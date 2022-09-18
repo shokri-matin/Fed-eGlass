@@ -1,9 +1,8 @@
+import sys
 import socket
 import pickle
 import SMC_functions
-import numpy as np
 
-import tensorflow as tf
 from src.model import Model
 from src.data_handler import DataHandler
 
@@ -60,7 +59,7 @@ class Client:
 class AVGClient(Client):
 
     def __init__(self, IP=socket.gethostname(), PORT=12345,
-                    HEADER_LENGTH=10, number_of_parties=2, username=None, batch_size=16, epochs=10, scenario=1):
+                    HEADER_LENGTH=10, number_of_parties=2, username=1, batch_size=16, epochs=10, scenario=1):
         
         self.epochs = epochs
         super().__init__(IP, PORT, HEADER_LENGTH, number_of_parties, username, batch_size, scenario)
@@ -97,15 +96,6 @@ class AVGClient(Client):
                 # get weights from party
                 cweights = party.model_head.get_weights()
 
-                # print(np.size(cweights[0]))
-                # print(cweights[0].shape)
-                # print(len(cweights[0]))
-                # print(len(cweights))
-
-
-                # print(cweights)
-                # exit()
-
                 masked_model_parameters = self.SMC_tools.mask(cweights)
 
                 # client sends gradient
@@ -117,6 +107,14 @@ class AVGClient(Client):
                 exit()
 
 if __name__ == "__main__":
-    
-    client = AVGClient(username=2)
+    args = sys.argv
+
+    username = int(args[1])
+    number_of_parties = int(args[2])
+    batch_size = int(args[3])
+    num_local_updates = int(args[4])
+    scenario = int(args[5])
+
+    client = AVGClient(number_of_parties=number_of_parties
+                        , username=username, batch_size=batch_size, epochs=num_local_updates, scenario=scenario)
     client.run()
