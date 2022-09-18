@@ -1,12 +1,17 @@
 import socket
 import pickle
+import SMC_functions
+import numpy as np
+
+import tensorflow as tf
 from src.model import Model
 from src.data_handler import DataHandler
+
 
 class Client:
 
     def __init__(self, IP, PORT, HEADER_LENGTH, number_of_parties, username, batch_size, scenario) -> None:
-        
+
         self.HEADER_LENGTH = HEADER_LENGTH
         self.IP = IP
         self.PORT = PORT
@@ -19,6 +24,11 @@ class Client:
         self.client_socket.setblocking(True)
 
         self.datahandler = DataHandler(username,  batch_size, number_of_parties, scenario)
+
+        self.SMC_tools = SMC_functions.SMCtools(num_parties=number_of_parties, party_id=username-1,
+                                                num_participating_parties=number_of_parties,
+                                                secure_aggregation_parameter_k=number_of_parties - 1,
+                                                scenario=scenario)
 
         print("Client initialization is completed on IP: {0}, Port: {1}".format(IP, PORT))
 
@@ -50,7 +60,7 @@ class Client:
 class AVGClient(Client):
 
     def __init__(self, IP=socket.gethostname(), PORT=12345,
-                    HEADER_LENGTH=10, number_of_parties=2, username=1, batch_size=32, epochs=1, scenario=1):
+                    HEADER_LENGTH=10, number_of_parties=2, username=None, batch_size=16, epochs=10, scenario=1):
         
         self.epochs = epochs
         super().__init__(IP, PORT, HEADER_LENGTH, number_of_parties, username, batch_size, scenario)
@@ -81,19 +91,25 @@ class AVGClient(Client):
                 party.set_weights(weights)
 
                 # updating loop
-                for e in range(0,self.epochs):
-                    print('epochs : {}'.format(e))
-                    for it in range(0,int(7000/self.batchsize)):
-                        x_batch_train, y_batch_train = self.datahandler.batch()
-                        print(x_batch_train.shape)
-                        print(y_batch_train.shape)
-                        party.model_head.train_on_batch(x_batch_train, y_batch_train)
+                x_train, y_train = self.datahandler.get_all_data()
+                party.model_head.fit(x_train, y_train, batch_size=16, epochs=2, verbose=1)
 
-                #
+                # get weights from party
                 cweights = party.model_head.get_weights()
 
+                # print(np.size(cweights[0]))
+                # print(cweights[0].shape)
+                # print(len(cweights[0]))
+                # print(len(cweights))
+
+
+                # print(cweights)
+                # exit()
+
+                masked_model_parameters = self.SMC_tools.mask(cweights)
+
                 # client sends gradient
-                self.send_weights(cweights)
+                self.send_weights(masked_model_parameters)
 
             except Exception as err:
                 print(err)

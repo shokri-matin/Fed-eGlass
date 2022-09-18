@@ -11,6 +11,7 @@ class DataHandler:
         self.username = username
         self.scenario = scenario
         self.tr_x, self.tr_y = self.load()
+        self.size_of_data = None
 
     def load(self):
 
@@ -28,14 +29,18 @@ class DataHandler:
 
         tr_x = model_base.predict(tr_x_raw)
 
+        self.size_of_data = tr_x.shape[0]
+
         return tr_x, tr_y
 
-    def batch(self):
-        index = np.random.choice(self.tr_x.shape[0], self.batch_size, replace=False)
-        xtr = self.tr_x[index]
-        ytr = self.tr_y[index]
-        return xtr, ytr
-
+    # def batch(self):
+    #     index = np.random.choice(self.tr_x.shape[0], self.batch_size, replace=False)
+    #     xtr = self.tr_x[index]
+    #     ytr = self.tr_y[index]
+    #     return xtr, ytr
+    
+    def get_all_data(self):
+        return self.tr_x, self.tr_y
 
 if __name__ == "__main__":
     handler = DataHandler()

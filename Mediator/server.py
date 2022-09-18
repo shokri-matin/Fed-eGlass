@@ -1,6 +1,10 @@
+import sys
 import socket
 import select
 import pickle
+import time
+
+import numpy as np
 
 from src.model import Model
 from src.data_handler import DataHandler
@@ -71,14 +75,16 @@ class Server(object):
 
     def test(self, mediator):
         x_ts, y_ts = DataHandler().load()
-        test_loss, test_acc = mediator.evaluate(x_ts,  y_ts)
+        _, test_acc = mediator.model_head.evaluate(x_ts,  y_ts)
 
         print('\nTest accuracy:', test_acc)
 
 class AVGServer(Server):
 
     def __init__(self, IP=socket.gethostname(), PORT=12345,
-     HEADER_LENGTH=10, number_of_parties=2):
+     HEADER_LENGTH=10, number_of_parties=2, num_of_epochs=100):
+
+        self.num_of_epochs = num_of_epochs
         super().__init__(IP, PORT, HEADER_LENGTH, number_of_parties)
 
     def recv_weights(self):
@@ -87,7 +93,7 @@ class AVGServer(Server):
         weights = {}
         flag = True
         while flag:
-            read_sockets, _, exception_sockets = select.select(self.socket_list, [], self.socket_list)
+            read_sockets, _, _ = select.select(self.socket_list, [], self.socket_list)
 
             for notified_socket in read_sockets:
                 if i != len(self.parties):
@@ -120,13 +126,14 @@ class AVGServer(Server):
             for j in range(0, len(global_model_parameters)):
                 global_model_parameters[j] += temp[j]
 
-        for j in range(0, len(self.global_model_parameters)):
+        for j in range(0, len(global_model_parameters)):
             global_model_parameters[j] /= self.number_of_parties
-
 
         return global_model_parameters
 
-    def run(self, epochs=30):
+    def run(self):
+
+        times = []
 
         print("create a mediator")
         # create a mediator
@@ -138,6 +145,9 @@ class AVGServer(Server):
         epoch=0
         while True:
             try:
+                # get the start time
+                start_time = time.time()
+
                 # server sends its weights to clients
                 weights = mediator.model_head.get_weights()
                 self.send_weights(weights)
@@ -153,16 +163,34 @@ class AVGServer(Server):
 
                 print('epochs:{}'.format(epoch))
                 
-                if epoch == epochs:
+                if epoch == self.num_of_epochs:
                     return mediator
                 epoch = epoch+1
+
+                end_time = time.time()
+
+                times.append(end_time-start_time)
 
             except Exception as err:
                 print(err)
                 print('Server is not longer available')
                 exit()
 
+        print("mean time process : {}".format(np.mean(times)))
+
+
+        return mediator
+
 if __name__ == "__main__":
-    server = AVGServer()
+    args = sys.argv
+    number_of_parties = int(args[1])
+    num_of_epochs = int(args[2])
+
+    server = AVGServer(IP=socket.gethostname(),
+                         PORT=12345,
+                         HEADER_LENGTH=10,
+                         number_of_parties=number_of_parties, 
+                         num_of_epochs=num_of_epochs)
+
     mediator = server.run()
     server.test(mediator)

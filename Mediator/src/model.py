@@ -13,24 +13,6 @@ class Model:
         head_size = 16
         num_class = 2
         dropout_rate = .3
-
-        # model_base = tf.keras.models.Sequential([
-        #                 tf.keras.layers.Flatten(input_shape=(2048, 1)),
-        #                 tf.keras.layers.Conv1D(512, kernel_size= 2, strides=2),
-        #                 tf.keras.layers.BatchNormalization(),
-        #                 tf.keras.layers.Activation('relu'),
-        #                 tf.keras.layers.Dropout(dropout_rate),
-        #                 tf.keras.layers.MaxPooling1D(pool_size=2),
-        #                 tf.keras.layers.Conv1D(128, kernel_size= 2, strides=2),
-        #                 tf.keras.layers.BatchNormalization(),
-        #                 tf.keras.layers.Activation('relu'),
-        #                 tf.keras.layers.Dropout(dropout_rate), 
-        #                 tf.keras.layers.Conv1D(64, kernel_size= 2, strides=2),
-        #                 tf.keras.layers.BatchNormalization(),
-        #                 tf.keras.layers.Activation('relu'),
-        #                 tf.keras.layers.Dropout(dropout_rate), 
-        #                 tf.keras.layers.Flatten()                      
-        #             ])
         
         model_base = tf.keras.models.load_model("../Model/model_base.h5")
 
