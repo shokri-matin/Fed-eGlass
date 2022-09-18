@@ -17,7 +17,7 @@ class DataHandler:
 
         model_base = tf.keras.models.load_model("../Model/model_base.h5")
 
-        root = os.path.normpath(os.getcwd() + os.sep + os.pardir)
+        root = os.path.normpath(os.getcwd())
         scenario_path = os.path.join("Scenario", "Scenario {}".format(self.scenario))
         dataset_path = os.path.join(scenario_path, "Dataset")
         src_path = os.path.join(root, dataset_path)
