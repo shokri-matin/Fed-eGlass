@@ -91,7 +91,7 @@ class AVGClient(Client):
 
                 # updating loop
                 x_train, y_train = self.datahandler.get_all_data()
-                party.model_head.fit(x_train, y_train, batch_size=16, epochs=2, verbose=1)
+                party.model_head.fit(x_train, y_train, batch_size=16, epochs=self.epochs, verbose=1)
 
                 # get weights from party
                 cweights = party.model_head.get_weights()
