@@ -10,14 +10,14 @@ class Model:
 
     def create_model(self):
 
-        head_size = 16
+        head_size = 8
         num_class = 2
         dropout_rate = .3
         
         model_base = tf.keras.models.load_model("../Model/model_base.h5")
 
         model_head = tf.keras.models.Sequential([
-                        tf.keras.layers.InputLayer(input_shape=[8192]),
+                        tf.keras.layers.InputLayer(input_shape=(1024)),
                         tf.keras.layers.Dense(head_size, kernel_regularizer=tf.keras.regularizers.L1(0.001)),
                         tf.keras.layers.BatchNormalization(),
                         tf.keras.layers.Activation('relu'),
