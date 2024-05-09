@@ -5,6 +5,6 @@
 </div>
 
 
-Related article: Aminifar, Amin, Matin Shokri, Amir Aminifar. "Privacy-Preserving Edge Federated Learning for Intelligent Mobile-Health Systems."
+Related article: Amin Aminifar, Matin Shokri, Amir Aminifar. "Privacy-Preserving Edge Federated Learning for Intelligent Mobile-Health Systems."
 
 Video: https://youtu.be/goe1k5rvxnc
