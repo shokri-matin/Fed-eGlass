@@ -1,5 +1,5 @@
 # Privacy-Preserving Edge Federated Learning for Intelligent Mobile-Health Systems
 
-![Fed-eGlass](./img/main.png)
+<img src="./img/main.png" alt="Fed-eGlass" width="300">
 
 Video: https://youtu.be/goe1k5rvxnc
